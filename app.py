@@ -2,6 +2,8 @@ import streamlit as st
 import copy
 import pandas as pd
 
+
+
 def grammarAugmentation(rules, nonterm_userdef, start_symbol):
     newRules = []
     newChar = start_symbol + "'"
@@ -85,16 +87,6 @@ def GOTO(state, charNextToDot, statesDict, stateMap, separatedRulesList):
     else:
         stateMap[(state, charNextToDot)] = stateExists
 
-def generateStates(statesDict, stateMap, separatedRulesList):
-    prev_len = -1
-    called_GOTO_on = []
-    while len(statesDict) != prev_len:
-        prev_len = len(statesDict)
-        keys = list(statesDict.keys())
-        for key in keys:
-            if key not in called_GOTO_on:
-                called_GOTO_on.append(key)
-                compute_GOTO(key, statesDict, stateMap, separatedRulesList)
 
 def first(rule, diction, term_userdef):
     if not rule:
@@ -143,59 +135,34 @@ def follow(nt, diction, start_symbol, term_userdef):
                             break
     return list(solset)
 
-def createParseTable(statesDict, stateMap, T, NT, separatedRulesList, rules, diction, term_userdef, start_symbol):
-    rows = list(statesDict.keys())
-    cols = T + ['$'] + NT
-    Table = []
-    for _ in rows:
-        Table.append([''] * len(cols))
 
-    for entry in stateMap:
-        state = entry[0]
-        symbol = entry[1]
-        a = rows.index(state)
-        b = cols.index(symbol)
-        if symbol in NT:
-            Table[a][b] += f"{stateMap[entry]} "
-        elif symbol in T:
-            Table[a][b] += f"S{stateMap[entry]} "
+def parse_grammar(grammar_input):
+    grammar_rules = {}
+    for line in grammar_input.strip().split("\n"):
+        parts = line.split(":")
+        if len(parts) == 2:
+            rule_num = int(parts[0].strip())
+            lhs, rhs = parts[1].split("->")
+            lhs = lhs.strip()
+            rhs = rhs.strip().split()
+            
+            # Replace epsilon (ε) with #
+            rhs = ['#'] if rhs == ["ε"] else rhs  
 
-    numbered = {}
-    key_count = 0
-    for rule in separatedRulesList:
-        tempRule = copy.deepcopy(rule)
-        if '.' in tempRule[1]:
-            tempRule[1].remove('.')
-        numbered[key_count] = tempRule
-        key_count += 1
+            grammar_rules[rule_num] = (lhs, rhs)
+    return grammar_rules
 
-    rules_copy = rules.copy()
-    addedR = f"{separatedRulesList[0][0]} -> {separatedRulesList[0][1][1]}"
-    rules_copy.insert(0, addedR)
 
-    for rule in rules_copy:
-        lhs, rhs = rule.split("->")
-        lhs = lhs.strip()
-        rhs = [r.strip().split() for r in rhs.strip().split('|')]
-        diction[lhs] = [['#'] if part == [''] else part for part in rhs]
-
-    for stateno in statesDict:
-        for rule in statesDict[stateno]:
-            if rule[1][-1] == '.' or (len(rule[1]) == 1 and rule[1][0] == '.'):
-                temp2 = copy.deepcopy(rule)
-                temp2[1] = [x for x in temp2[1] if x != '.']
-                for key in numbered:
-                    if numbered[key] == temp2:
-                        follow_result = follow(rule[0], diction, start_symbol, term_userdef)
-                        for col in follow_result:
-                            if col in cols:
-                                index = cols.index(col)
-                                if key == 0:
-                                    Table[stateno][index] = "Accept"
-                                else:
-                                    Table[stateno][index] += f"R{key} " if Table[stateno][index] != "Accept" else f"R{key} "
-
-    return Table, rows, cols
+def generateStates(statesDict, stateMap, separatedRulesList):
+    prev_len = -1
+    called_GOTO_on = []
+    while len(statesDict) != prev_len:
+        prev_len = len(statesDict)
+        keys = list(statesDict.keys())
+        for key in keys:
+            if key not in called_GOTO_on:
+                called_GOTO_on.append(key)
+                compute_GOTO(key, statesDict, stateMap, separatedRulesList)
 
 
 def generate_conflict_counts(table):
