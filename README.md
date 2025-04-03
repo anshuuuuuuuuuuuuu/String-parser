@@ -15,8 +15,8 @@ This project implements an **SLR(1) Parser** using **Streamlit** for interactive
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/anshuuuuuuuuuuuuu/slr-parser.git
-   cd slr-parser
+   git clone https://github.com/anshuuuuuuuuuuuuu/String-parser.git
+   cd String-parser
    ```
 
 2. Install dependencies:
