@@ -1,3 +1,6 @@
+### Demo Link
+https://slr-string-parser.streamlit.app/
+
 # SLR(1) Parser with Step-by-Step Visualization
 
 This project implements an **SLR(1) Parser** using **Streamlit** for interactive visualization and **Graphviz** for graphical representation of the parsing process. The parser processes an input string based on a user-defined **parsing table** and **grammar rules**, providing step-by-step feedback and error handling.
